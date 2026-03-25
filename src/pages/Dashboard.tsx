@@ -1,22 +1,28 @@
 import { useState, useCallback } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
 import SummaryCards from "@/components/dashboard/SummaryCards";
+import TaxPanel from "@/components/dashboard/TaxPanel";
 import DataTable from "@/components/dashboard/DataTable";
 import ProfitChart from "@/components/dashboard/ProfitChart";
-import type { Row } from "@/components/dashboard/types";
-import { calcProfit } from "@/components/dashboard/types";
+import type { Row, TaxConfig, OpType } from "@/components/dashboard/types";
 
 let nextId = 1;
 
 const Dashboard = () => {
   const [rows, setRows] = useState<Row[]>([
-    { id: nextId++, dep1: 0, dep2: 0, saque: 0, mae: 0 },
+    { id: nextId++, dep1: 0, dep2: 0, saque: 0, mae: 0, tipo: "bau" },
   ]);
+
+  const [tax, setTax] = useState<TaxConfig>({
+    enabled: false,
+    target: "mae",
+    rate: 0,
+  });
 
   const addRow = useCallback(() => {
     setRows((prev) => [
       ...prev,
-      { id: nextId++, dep1: 0, dep2: 0, saque: 0, mae: 0 },
+      { id: nextId++, dep1: 0, dep2: 0, saque: 0, mae: 0, tipo: "bau" },
     ]);
   }, []);
 
@@ -25,7 +31,7 @@ const Dashboard = () => {
   }, []);
 
   const updateRow = useCallback(
-    (id: number, field: keyof Omit<Row, "id">, value: number) => {
+    (id: number, field: keyof Omit<Row, "id">, value: number | OpType) => {
       setRows((prev) =>
         prev.map((r) => (r.id === id ? { ...r, [field]: value } : r))
       );
@@ -33,17 +39,15 @@ const Dashboard = () => {
     []
   );
 
-  const totalProfit = rows.reduce((sum, r) => sum + calcProfit(r), 0);
-
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-5 py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">$</span>
+              <span className="text-primary-foreground font-extrabold text-sm">$</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+            <h1 className="text-lg font-bold text-foreground tracking-tight">
               CPA Money
             </h1>
           </div>
@@ -51,10 +55,11 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8">
-        <SummaryCards rows={rows} totalProfit={totalProfit} />
-        <DataTable rows={rows} onAddRow={addRow} onRemoveRow={removeRow} onUpdateRow={updateRow} />
-        <ProfitChart rows={rows} />
+      <main className="max-w-[1100px] mx-auto px-4 sm:px-5 py-6 space-y-5">
+        <SummaryCards rows={rows} tax={tax} />
+        <TaxPanel tax={tax} onTaxChange={setTax} />
+        <DataTable rows={rows} tax={tax} onAddRow={addRow} onRemoveRow={removeRow} onUpdateRow={updateRow} />
+        <ProfitChart rows={rows} tax={tax} />
       </main>
     </div>
   );
