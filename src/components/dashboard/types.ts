@@ -35,8 +35,8 @@ export interface TaxConfig {
 
 export const calcProfit = (r: Row) => r.saque + r.mae - (r.dep1 + r.dep2);
 
-export const calcTax = (r: Row, tax: TaxConfig): number => {
-  if (!tax.enabled || tax.rate <= 0) return 0;
+export const calcTax = (r: Row, tax?: TaxConfig): number => {
+  if (!tax || !tax.enabled || tax.rate <= 0) return 0;
   const pct = tax.rate / 100;
   switch (tax.target) {
     case "mae":
@@ -48,5 +48,5 @@ export const calcTax = (r: Row, tax: TaxConfig): number => {
   }
 };
 
-export const calcNetProfit = (r: Row, tax: TaxConfig) =>
+export const calcNetProfit = (r: Row, tax?: TaxConfig) =>
   calcProfit(r) - calcTax(r, tax);
