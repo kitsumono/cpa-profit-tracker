@@ -48,5 +48,5 @@ export const calcTax = (r: Row, tax?: TaxConfig): number => {
   }
 };
 
-export const calcNetProfit = (r: Row, tax: TaxConfig) =>
+export const calcNetProfit = (r: Row, tax?: TaxConfig) =>
   calcProfit(r) - calcTax(r, tax);
